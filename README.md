@@ -35,4 +35,9 @@ access to  `127.0.0.1:8000/swagger` to see swagger document
 - [x] add serilizer
 - [ ] add unit test
 
+### Test Case
+use below command in docker container
+```
+python manage.py test url_mapping.tests
+```
 
