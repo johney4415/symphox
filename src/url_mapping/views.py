@@ -9,6 +9,7 @@ import random
 from url_mapping.models import UrlMapping
 from django.conf import settings
 import urllib
+from django.shortcuts import redirect
 
 urllib.parse.urljoin
 my_domain = getattr(settings, 'DOMAIN') or 'http://127.0.0.1:8000'
@@ -58,8 +59,9 @@ class RecoveryUrlView(APIView):
         except Exception as e:
             errors['error'] = e
         if errors:
-            return CustomJsonResponse(result_data=errors, return_message="can not find this url code")
-        result = {
-            "url":obj.origin_url
-        }
-        return CustomJsonResponse(result_data=result, return_message='success')
+            return CustomJsonResponse(
+                result_data=errors,
+                return_message="can not find this url code")
+        return redirect(obj.origin_url)
+        # result = {"url": obj.origin_url}
+        # return CustomJsonResponse(result_data=result, return_message='success')
