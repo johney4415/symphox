@@ -2,4 +2,5 @@ venv/
 .devcontainer/
 .vscode/
 .env
+volumes/*
 
