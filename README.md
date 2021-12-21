@@ -32,7 +32,7 @@ docker-compose build && docker-compose up -d
 access to  `127.0.0.1:8000/swagger` to see swagger document
 
 ### TODO
-- [ ] add serilizer
+- [x] add serilizer
 - [ ] add unit test
 
 
