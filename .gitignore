@@ -4,3 +4,4 @@ venv/
 .env
 volumes/*
 
+src/*/__pycache__/
