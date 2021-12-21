@@ -1,0 +1,125 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  PROJECT: "btox"
+  REPOSITORY: "api"
+  
+
+.job_build_template:
+  stage: build
+  image: docker:19.03
+  before_script:
+    - apk add --update py-pip
+    - pip install awscli --upgrade
+    - aws configure set region $AWS_DEFAULT_REGION
+    - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+    - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+  script:
+    - >-
+      docker build -t $ECR_URL/$PROJECT/$ENV/$REPOSITORY:latest 
+      -t $ECR_URL/$PROJECT/$ENV/$REPOSITORY:$CI_COMMIT_SHORT_SHA .
+    - >-
+      aws ecr get-login-password --region $AWS_DEFAULT_REGION | 
+      docker login --username AWS --password-stdin $ECR_URL
+    - docker push $ECR_URL/$PROJECT/$ENV/$REPOSITORY:$CI_COMMIT_SHORT_SHA
+    - docker push $ECR_URL/$PROJECT/$ENV/$REPOSITORY:latest
+    - docker logout $ECR_URL
+
+
+.job_deploy_template:
+  stage: deploy
+  image:
+    name: amazon/aws-cli
+    entrypoint: [""]
+  before_script:
+    - aws configure set region $AWS_DEFAULT_REGION
+    - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+    - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+  script:
+    - >-
+      aws ecs update-service --region $AWS_DEFAULT_REGION --service $REPOSITORY 
+      --cluster $PROJECT-$ENV --force-new-deployment
+    - aws ecs wait services-stable --services $REPOSITORY --cluster $PROJECT-$ENV
+
+dev_build:
+  extends: .job_build_template
+  stage: build
+  variables:
+    ENV: "dev"
+  only:
+    - develop
+  tags:
+    - local
+
+dev_deploy:
+  extends: .job_deploy_template
+  stage: deploy
+  variables:
+    ENV: "dev"
+  only:
+    - develop
+  tags:
+    - local
+
+sit_build:
+  extends: .job_build_template
+  stage: build
+  variables:
+    ENV: "sit"
+  only:
+    - /^(RC|Verify)_v.*$/
+  tags:
+    - local
+
+sit_deploy:
+  extends: .job_deploy_template
+  stage: deploy
+  variables:
+    ENV: "sit"
+  only:
+    - /^(RC|Verify)_v.*$/
+  tags:
+    - local
+
+uat_build:
+  extends: .job_build_template
+  stage: build
+  variables:
+    ENV: "uat"
+  only:
+    - master
+  tags:
+    - local
+
+uat_deploy:
+  extends: .job_deploy_template
+  stage: deploy
+  variables:
+    ENV: "uat"
+  only:
+    - master
+  tags:
+    - local
+
+prd_build:
+  extends: .job_build_template
+  stage: build
+  variables:
+    ENV: "prd"
+  only:
+    - /^v.*$/
+  tags:
+    - local
+
+prd_deploy:
+  extends: .job_deploy_template
+  stage: deploy
+  variables:
+    ENV: "prd"
+  only:
+    - /^v.*$/
+  when: manual
+  tags:
+    - local
