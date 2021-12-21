@@ -6,6 +6,9 @@ python3 manage.py collectstatic --noinput
 echo "Apply Database Migrations"
 python3 manage.py migrate
 
+echo "Load default sys images"
+python3 manage.py load_sysimg
+
 echo "Load default data"
 python3 manage.py loaddata_cus ./*/default_data/*.yaml
 # python3 manage.py loaddata_cus ./*/default_data/*.yaml --force

@@ -11,7 +11,7 @@ from django.conf import settings
 import urllib
 
 urllib.parse.urljoin
-my_domain = getattr(settings, 'DOMAIN', 'http://127.0.0.1:8000')
+my_domain = getattr(settings, 'DOMAIN') or 'http://127.0.0.1:8000'
 
 
 class ShortenerView(APIView):
