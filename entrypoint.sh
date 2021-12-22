@@ -1,5 +1,7 @@
 #!/bin/bash
 
+sleep 20
+
 echo "Collect Static Files"
 python3 manage.py collectstatic --noinput
 
